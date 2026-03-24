@@ -17,3 +17,6 @@ app_directories:
 
 nginx_worker_processes: 2
 nginx_server_name: "localhost"
+
+db_password: "{{ vault_db_password }}"
+api_key: "{{ vault_api_key }}"

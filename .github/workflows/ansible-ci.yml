@@ -34,6 +34,10 @@ jobs:
         run: |
           ansible-playbook webserver.yml --syntax-check
 
-      - name: Dry-run site playbook (check mode)
+      - name: Dry-run with vault
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
-          ansible-playbook site.yml --check --diff
+          echo "$ANSIBLE_VAULT_PASSWORD" > .vault_pass
+          ansible-playbook site.yml --check --diff --vault-password-file .vault_pass
+          rm -f .vault_pass
