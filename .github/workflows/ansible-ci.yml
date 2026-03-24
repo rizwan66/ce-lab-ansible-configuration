@@ -1,0 +1,43 @@
+name: Ansible CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Ansible and linter
+        run: |
+          pip install ansible ansible-lint
+
+      - name: Run ansible-lint
+        run: |
+          ansible-lint site.yml webserver.yml
+
+      - name: Syntax check — site playbook
+        run: |
+          ansible-playbook site.yml --syntax-check
+
+      - name: Syntax check — webserver playbook
+        run: |
+          ansible-playbook webserver.yml --syntax-check
+
+      - name: Dry-run with vault
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
+        run: |
+          echo "$ANSIBLE_VAULT_PASSWORD" > .vault_pass
+          ansible-playbook site.yml --check --diff --vault-password-file .vault_pass
+          rm -f .vault_pass
